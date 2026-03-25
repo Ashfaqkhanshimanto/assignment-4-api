@@ -1,0 +1,310 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Programming Quotes API",
+    "version": "1.0.0",
+    "description": "A REST API for programming quotes with categories and voting."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "motivation" }
+        }
+      },
+      "Quote": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "text": {
+            "type": "string",
+            "example": "First, solve the problem. Then, write the code."
+          },
+          "author": { "type": "string", "example": "John Johnson" },
+          "likes": { "type": "integer", "example": 3 },
+          "dislikes": { "type": "integer", "example": 1 }
+        }
+      },
+      "QuoteWithCategories": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Quote" },
+          {
+            "type": "object",
+            "properties": {
+              "categories": {
+                "type": "array",
+                "items": { "type": "string" },
+                "example": ["motivation", "debugging"]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Welcome route",
+        "responses": {
+          "200": {
+            "description": "Welcome message",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Welcome to the Programming Quotes API",
+                  "documentation": "http://localhost:3000/docs"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "example": { "status": "ok" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "summary": "Get all categories",
+        "responses": {
+          "200": {
+            "description": "List of categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Category" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add a new category",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": { "name": "python" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Category created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Category" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/categories/{category}/quotes": {
+      "get": {
+        "summary": "Get all quotes in a category",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "motivation"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Quotes in this category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Quote" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quotes/random": {
+      "get": {
+        "summary": "Get a random quote from all quotes",
+        "responses": {
+          "200": {
+            "description": "Random quote",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Quote" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quotes/random/{category}": {
+      "get": {
+        "summary": "Get a random quote from a category",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "debugging"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Random quote from the selected category",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Quote" }
+              }
+            }
+          },
+          "404": {
+            "description": "No quote found"
+          }
+        }
+      }
+    },
+    "/api/quotes/{id}": {
+      "get": {
+        "summary": "Get a quote by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Quote details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/QuoteWithCategories" }
+              }
+            }
+          },
+          "404": {
+            "description": "Quote not found"
+          }
+        }
+      }
+    },
+    "/api/quotes": {
+      "post": {
+        "summary": "Add a new quote with categories",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "text": "Code is like humor. When you have to explain it, it’s bad.",
+                "author": "Cory House",
+                "categories": ["funny", "career"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Quote created"
+          }
+        }
+      }
+    },
+    "/api/quotes/{id}/categories": {
+      "post": {
+        "summary": "Assign an existing quote to an additional category",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" },
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": { "category": "javascript" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Category assigned"
+          }
+        }
+      }
+    },
+    "/api/quotes/{id}/vote": {
+      "post": {
+        "summary": "Vote on a quote",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" },
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "examples": {
+                "like": {
+                  "value": { "vote": "like" }
+                },
+                "dislike": {
+                  "value": { "vote": "dislike" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated vote counts",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Quote" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
