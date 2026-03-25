@@ -1,10 +1,13 @@
 {
   "name": "assignment-4-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Programming Quotes API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "keywords": [],
   "author": "",
